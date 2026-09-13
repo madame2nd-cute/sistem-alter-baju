@@ -1,0 +1,8 @@
+{
+  "name": "sistem-alter-baju",
+  "version": "1.0.0",
+  "description": "Sistem borang dan panel admin alter baju",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=18" }
+}

@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistem Alter Baju</title>
+<style>
+  :root{
+    --ink:#232323; --paper:#FAF7F1; --paper-2:#F1ECE2; --line:#D9D2C2;
+    --navy:#243342; --navy-2:#33475A; --rust:#B14A2C; --rust-2:#8F3A21;
+    --sage:#4C6E52; --sage-bg:#E6EDE4; --danger:#A63A2E; --danger-bg:#F4E4E0; --muted:#807A6C;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--paper); color:var(--ink); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; font-size:15px; line-height:1.5;}
+  h1,h2,h3{font-family:Georgia,"Times New Roman",serif; font-weight:600; margin:0;}
+  .wrap{max-width:640px; margin:0 auto; padding:18px 16px 60px;}
+  .topbar{display:flex; justify-content:space-between; align-items:baseline; padding:16px 4px 14px; border-bottom:2px solid var(--navy);}
+  .topbar h1{font-size:21px; color:var(--navy);}
+  .topbar .thread{font-size:11px; color:var(--muted);}
+  .tabs{display:flex; gap:0; margin:18px 0 22px; border-bottom:1px solid var(--line); flex-wrap:wrap;}
+  .tab{flex:1; min-width:80px; text-align:center; padding:10px 4px; cursor:pointer; font-size:13px; color:var(--muted); border-bottom:2px solid transparent; background:none; border-top:none; border-left:none; border-right:none;}
+  .tab.active{color:var(--navy); border-bottom-color:var(--rust); font-weight:600;}
+  section{display:none;} section.active{display:block;}
+  .card{background:#fff; border:1px solid var(--line); border-radius:6px; padding:16px 18px; margin-bottom:14px;}
+  .card h2{font-size:17px; color:var(--navy); margin-bottom:2px;}
+  .card .sub{font-size:12.5px; color:var(--muted); margin-bottom:12px;}
+  label{display:block; font-size:12.5px; color:var(--navy-2); margin:10px 0 4px; font-weight:600;}
+  input[type=text], input[type=number], input[type=tel], select, textarea{width:100%; padding:9px 10px; border:1px solid var(--line); border-radius:4px; font-size:14.5px; background:#fffdf9; color:var(--ink); font-family:inherit;}
+  input[type=file]{width:100%; font-size:12.5px;}
+  textarea{min-height:56px; resize:vertical;}
+  input:focus, select:focus, textarea:focus{outline:2px solid var(--navy-2); outline-offset:1px;}
+  .row{display:flex; gap:10px;} .row > *{flex:1;}
+  button{font-family:inherit; font-size:14px; cursor:pointer; border-radius:4px; border:1px solid var(--navy); background:#fff; color:var(--navy); padding:9px 14px;}
+  button:hover{background:var(--paper-2);}
+  .btn-primary{background:var(--navy); color:#fff; border-color:var(--navy); width:100%; font-weight:600; padding:12px;}
+  .btn-primary:hover{background:var(--navy-2);}
+  .btn-rust{background:var(--rust); color:#fff; border-color:var(--rust);} .btn-rust:hover{background:var(--rust-2);}
+  .btn-ghost{border:none; background:none; color:var(--muted); padding:4px 8px;}
+  .btn-full{width:100%;}
+  .pill{display:inline-block; font-size:11.5px; padding:2px 9px; border-radius:20px;}
+  .pill-sage{background:var(--sage-bg); color:var(--sage);} .pill-danger{background:var(--danger-bg); color:var(--danger);}
+  .cat-block{border:1px solid var(--line); border-radius:6px; padding:14px; margin-bottom:12px; background:var(--paper);}
+  .cat-block .cat-title{display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;}
+  .cat-block .cat-title h3{font-size:15px; color:var(--rust);}
+  .svc-row{border:1px solid var(--line); border-radius:4px; padding:10px; margin-bottom:8px; background:#fff;}
+  .svc-row .svc-top{display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; font-size:14px; font-weight:600;}
+  .price{color:var(--muted); font-weight:400; font-size:13px;}
+  .totalrow{display:flex; justify-content:space-between; align-items:baseline; padding-top:10px; border-top:1px solid var(--line); margin-top:8px;}
+  .totalrow .amt{font-size:19px; font-weight:700; color:var(--navy);}
+  .grandtotal{background:var(--navy); color:#fff; border-radius:6px; padding:14px 18px; display:flex; justify-content:space-between; align-items:baseline; margin:16px 0;}
+  .grandtotal .amt{font-size:23px; font-weight:700;}
+  .notice{border-radius:5px; padding:9px 12px; font-size:13px; margin:8px 0;}
+  .notice-danger{background:var(--danger-bg); color:var(--danger);} .notice-sage{background:var(--sage-bg); color:var(--sage);} .notice-muted{background:var(--paper-2); color:var(--navy-2);}
+  .photo-box{display:flex; justify-content:space-between; align-items:center; gap:8px; border:1px dashed var(--line); border-radius:4px; padding:8px 10px; margin-bottom:6px; font-size:13px;}
+  .photo-box.done{border-style:solid; border-color:var(--sage);}
+  .photo-thumb{max-height:70px; border-radius:4px; margin:-2px 0 8px; display:block;}
+  .status-line{display:flex; justify-content:space-between; font-size:13px; padding:4px 0;}
+  .status-line .lbl{color:var(--muted);}
+  table.admin-tbl{width:100%; border-collapse:collapse; font-size:13px; margin-top:8px;}
+  table.admin-tbl th{text-align:left; font-size:11.5px; color:var(--muted); border-bottom:1px solid var(--line); padding:6px 4px; font-weight:600;}
+  table.admin-tbl td{padding:7px 4px; border-bottom:1px solid var(--paper-2); vertical-align:top;}
+  .settings-grp{margin-bottom:18px;} .settings-grp h3{font-size:14px; color:var(--navy); margin-bottom:8px;}
+  .toggle-line{display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;} .toggle-line span{font-size:13.5px;}
+  .switch{position:relative; width:38px; height:21px;} .switch input{opacity:0; width:0; height:0;}
+  .slider{position:absolute; inset:0; background:var(--line); border-radius:20px; cursor:pointer; transition:.15s;}
+  .slider:before{content:""; position:absolute; width:16px; height:16px; left:2.5px; top:2.5px; background:#fff; border-radius:50%; transition:.15s;}
+  input:checked + .slider{background:var(--sage);} input:checked + .slider:before{transform:translateX(17px);}
+  .svc-admin-row{display:flex; gap:8px; align-items:center; margin-bottom:6px;} .svc-admin-row input{flex:1;}
+  .small-note{font-size:11.5px; color:var(--muted); margin-top:2px;}
+  .empty{text-align:center; color:var(--muted); padding:24px 0; font-size:13.5px;}
+  .order-card{border:1px solid var(--line); border-radius:6px; padding:12px 14px; margin-bottom:10px;}
+  .order-card .oc-top{display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px;}
+  .order-card .oc-top strong{font-size:14px;}
+  .qr-preview{max-width:180px; display:block; border-radius:6px; margin:8px 0; border:1px solid var(--line);}
+  .alert-list-item{border-left:3px solid var(--rust); padding:8px 10px; margin-bottom:8px; background:var(--paper); font-size:13px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar"><h1>Alter&amp;Jahit</h1><span class="thread">borang &amp; panel tailor</span></div>
+  <div class="tabs">
+    <button class="tab active" data-tab="pelanggan">Borang</button>
+    <button class="tab" data-tab="bayar">Pusat Bayaran</button>
+    <button class="tab" data-tab="status">Status</button>
+    <button class="tab" data-tab="admin">Admin</button>
+  </div>
+  <section id="tab-pelanggan" class="active"></section>
+  <section id="tab-bayar"></section>
+  <section id="tab-status"></section>
+  <section id="tab-admin"></section>
+</div>
+
+<script>
+const API = ''; // same origin
+async function api(path, opts){
+  opts = opts || {};
+  opts.headers = Object.assign({'Content-Type':'application/json'}, opts.headers||{});
+  const res = await fetch(API+path, opts);
+  const data = await res.json().catch(()=>({}));
+  if(!res.ok) throw new Error(data.error || 'Ralat pelayan');
+  return data;
+}
+function adminHeaders(){ return { 'X-Admin-Pin': sessionStorage.getItem('adminPin') || '' }; }
+
+function normPhone(raw){ let d=(raw||'').replace(/[^0-9]/g,''); if(d.startsWith('60')) d='0'+d.slice(2); if(!d.startsWith('0') && d.length>0) d='0'+d; return d; }
+function fmt(n){ return 'RM'+(Math.round(n*100)/100).toFixed(2); }
+function addWorkingDays(dateStr, days){ let d=new Date(dateStr+'T00:00:00'); let added=0; while(added<days){ d.setDate(d.getDate()+1); const wd=d.getDay(); if(wd!==0&&wd!==6) added++; } return d.toISOString().slice(0,10); }
+function subWorkingDays(dateStr, days){ let d=new Date(dateStr+'T00:00:00'); let sub=0; while(sub<days){ d.setDate(d.getDate()-1); const wd=d.getDay(); if(wd!==0&&wd!==6) sub++; } return d.toISOString().slice(0,10); }
+
+function compressImage(file){
+  return new Promise((resolve, reject)=>{
+    try{
+      const reader = new FileReader();
+      reader.onload = (e)=>{
+        const img = new Image();
+        img.onload = ()=>{
+          try{
+            const maxW = 700;
+            const scale = Math.min(1, maxW/img.width);
+            const canvas = document.createElement('canvas');
+            canvas.width = Math.round(img.width*scale) || 1;
+            canvas.height = Math.round(img.height*scale) || 1;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            resolve(canvas.toDataURL('image/jpeg', 0.55));
+          }catch(err){ reject(err); }
+        };
+        img.onerror = ()=>reject(new Error('Gagal memuatkan imej'));
+        img.src = e.target.result;
+      };
+      reader.onerror = ()=>reject(new Error('Gagal membaca fail'));
+      reader.readAsDataURL(file);
+    }catch(err){ reject(err); }
+  });
+}
+
+const STEPS_POS = ['Order diterima','Menunggu pakaian sampai','Dalam proses','Siap & dibungkus','Menunggu bayaran pos','Bayaran pos disahkan','Dalam penghantaran','Selesai'];
+const STEPS_OTHER = ['Order diterima','Menunggu pakaian sampai','Dalam proses','Siap & dibungkus','Sedia diambil','Selesai'];
+function stepsFor(o){ return o.ambil==='pos' ? STEPS_POS : STEPS_OTHER; }
+
+let SETTINGS = null;
+let categories = [];
+let catCounter = 0;
+
+function jenisLabel(j){ return {baju:'Baju', jubah:'Jubah', seluar_biasa:'Seluar biasa/slek', seluar_jeans:'Seluar jeans', kain:'Kain', lain:'Lain-lain'}[j]; }
+function priceFor(svc, jenis){ return jenis==='seluar_jeans' ? svc.priceJeans : svc.priceDefault; }
+function newCategory(){ catCounter++; return { id:'cat'+catCounter+'_'+Date.now(), jenis:'baju', otherText:'', qty:1, urgent:false, services:[], photoRequiredData:null, photoNote:'', extraPhotos:[] }; }
+
+function renderPelanggan(){
+  const el = document.getElementById('tab-pelanggan');
+  el.innerHTML = `
+    <div class="card">
+      <h2>Bahagian A — Maklumat Pelanggan</h2>
+      <div class="sub">Isi maklumat untuk urusan penghantaran &amp; hubungan</div>
+      <label>Nama penuh</label><input type="text" id="p-nama">
+      <label>Alamat</label><textarea id="p-alamat"></textarea>
+      <label>No. telefon</label><input type="tel" id="p-phone" placeholder="012-3456789">
+      <label>Cara menghantar pakaian</label>
+      <select id="p-hantar">
+        <option value="sendiri">Hantar sendiri</option><option value="runner">Runner</option>
+        <option value="pos">Pos</option><option value="ukur">Datang untuk ukur (temu janji)</option>
+      </select>
+      <div id="p-platwrap" style="display:none;"><label>No. plat kenderaan</label><input type="text" id="p-plat"></div>
+      <div id="p-slotwrap" style="display:none;">
+        <label>Pilih tarikh temu janji</label><select id="p-slot"></select>
+        <p class="small-note">Jika tiada slot sesuai, tarikh akan dimaklumkan oleh tailor melalui WhatsApp selepas order dihantar.</p>
+      </div>
+      <div id="p-ambilwrap">
+        <label>Cara menerima balik pakaian selepas siap</label>
+        <select id="p-ambil"><option value="sendiri">Kutip sendiri</option><option value="runner">Runner</option><option value="pos">Pos</option></select>
+        <p class="small-note">Jika pilih Pos: kos pos akan ditetapkan oleh tailor SELEPAS pakaian siap dibungkus, dan anda akan dimaklumkan untuk membayar kemudian.</p>
+      </div>
+      <label>Cara bayaran baki (di lokasi/selepas siap)</label>
+      <select id="p-bayar"><option value="cash">Tunai</option><option value="qr">QR</option><option value="bank">Pindahan bank</option></select>
+    </div>
+
+    <div class="card">
+      <h2>Bahagian B — Maklumat Pakaian</h2>
+      <div class="sub">Kumpulkan pakaian yang sama arahan alternya dalam satu kategori</div>
+      <div id="cat-list"></div>
+      <button class="btn-full" id="btn-add-cat" type="button">+ Tambah kategori</button>
+    </div>
+
+    <div class="card">
+      <h2>Bahagian C — Diskaun &amp; Baucer</h2>
+      <label>Kod baucer (jika ada)</label><input type="text" id="p-baucer" placeholder="Contoh: BCR1023">
+      <div id="baucer-msg"></div>
+      <div id="c-breakdown" style="margin-top:10px;"></div>
+    </div>
+
+    <div class="card">
+      <h2>Bahagian D — Invois</h2>
+      <div class="sub">Invois ini TIDAK termasuk kos pos (jika ada) — kos pos ditetapkan kemudian</div>
+      <div id="d-summary"></div>
+      <div id="d-warning"></div>
+      <div id="d-error"></div>
+      <button class="btn-primary btn-rust" id="btn-bayar" type="button" style="margin-top:12px;">Sahkan Pesanan</button>
+      <div id="d-receipt"></div>
+    </div>
+  `;
+  document.getElementById('p-hantar').addEventListener('change', onHantarChange);
+  document.getElementById('btn-add-cat').addEventListener('click', ()=>{ categories.push(newCategory()); renderCategories(); recalc(); });
+  document.getElementById('p-baucer').addEventListener('input', recalc);
+  document.getElementById('p-phone').addEventListener('input', recalc);
+  document.getElementById('btn-bayar').addEventListener('click', doBayar);
+  onHantarChange();
+  if(categories.length===0){ categories.push(newCategory()); }
+  renderCategories();
+  recalc();
+}
+
+function onHantarChange(){
+  const v = document.getElementById('p-hantar').value;
+  document.getElementById('p-platwrap').style.display = (v==='sendiri'||v==='runner') ? 'block':'none';
+  document.getElementById('p-slotwrap').style.display = (v==='ukur') ? 'block':'none';
+  if(v==='ukur'){
+    const sel = document.getElementById('p-slot');
+    sel.innerHTML = SETTINGS.appointmentSlots.map(d=>`<option value="${d}">${d}</option>`).join('') + `<option value="__later__">Tiada sesuai — WhatsApp saya kemudian</option>`;
+  }
+  recalc();
+}
+
+function renderCategories(){
+  const wrap = document.getElementById('cat-list');
+  wrap.innerHTML = categories.map((c, idx)=>{
+    const svcOptions = SETTINGS.services.map(s=>`<option value="${s.id}">${s.name} — ${fmt(priceFor(s,c.jenis))}</option>`).join('');
+    const svcRows = c.services.map((row, si)=>`
+      <div class="svc-row">
+        <div class="svc-top"><span>${row.name} <span class="price">${fmt(row.price)}</span></span>
+          <button class="btn-ghost" type="button" onclick="removeService('${c.id}', ${si})">✕</button>
+        </div>
+        <input type="text" placeholder="Ukuran (cm/inci)" value="${row.ukuran||''}" oninput="updateServiceField('${c.id}',${si},'ukuran',this.value)">
+        <textarea placeholder="Nota tambahan" style="margin-top:6px;" oninput="updateServiceField('${c.id}',${si},'nota',this.value)">${row.nota||''}</textarea>
+      </div>`).join('');
+    return `
+      <div class="cat-block">
+        <div class="cat-title"><h3>Kategori ${idx+1}</h3>
+          ${categories.length>1 ? `<button class="btn-ghost" type="button" onclick="removeCategory('${c.id}')">Buang</button>` : ''}
+        </div>
+        <div class="row">
+          <div><label>Jenis pakaian</label>
+            <select onchange="updateCatField('${c.id}','jenis',this.value)">
+              ${['baju','jubah','seluar_biasa','seluar_jeans','kain','lain'].map(j=>`<option value="${j}" ${c.jenis===j?'selected':''}>${jenisLabel(j)}</option>`).join('')}
+            </select>
+          </div>
+          <div><label>Kuantiti helai</label><input type="number" min="1" value="${c.qty}" oninput="updateCatField('${c.id}','qty',this.value)"></div>
+        </div>
+        ${c.jenis==='lain' ? `<label>Nyatakan jenis pakaian</label><input type="text" value="${c.otherText}" oninput="updateCatField('${c.id}','otherText',this.value)">` : ''}
+        <label style="margin-top:12px;">Servis alter</label>
+        ${svcRows}
+        <select onchange="addService('${c.id}', this.value); this.value='';">
+          <option value="">+ Tambah servis</option>${svcOptions}
+          <option value="__wa__">Servis tidak ada dalam senarai?</option>
+        </select>
+        <div id="wa-${c.id}" style="display:none;" class="notice notice-muted">Servis tiada? Hubungi tailor terus melalui WhatsApp untuk cadangan servis sepadan, kemudian kembali dan pilih servis tersebut.</div>
+
+        <label style="margin-top:12px;">Gambar pakaian</label>
+        <div class="photo-box ${c.photoRequiredData?'done':''}">
+          <span>Gambar pakaian (wajib)${c.photoRequiredData?' ✓':''}</span>
+          <input type="file" accept="image/*" onchange="handleRequiredPhoto('${c.id}', this.files[0])">
+        </div>
+        ${c.photoRequiredData ? `<img class="photo-thumb" src="${c.photoRequiredData}">` : ''}
+        <div id="photo-err-${c.id}"></div>
+        <p class="small-note">Jika upload gambar tidak berfungsi pada peranti anda, terangkan pakaian di ruang ini sebagai gantian sementara:</p>
+        <textarea placeholder="Penerangan pakaian (gantian jika upload gagal)" oninput="updateCatField('${c.id}','photoNote',this.value)">${c.photoNote||''}</textarea>
+        ${c.extraPhotos.map((p,i)=>`
+          <div class="photo-box done" style="margin-top:8px;"><span>Gambar tambahan ${i+1}</span><button class="btn-ghost" type="button" onclick="removeExtraPhoto('${c.id}',${i})">✕</button></div>
+          <img class="photo-thumb" src="${p}">`).join('')}
+        <label style="font-weight:400; font-size:12.5px; margin-top:6px;">+ Tambah gambar (pilihan)</label>
+        <input type="file" accept="image/*" onchange="handleExtraPhoto('${c.id}', this.files[0]); this.value='';">
+
+        <label style="margin-top:12px; display:flex; align-items:center; justify-content:space-between;">
+          <span>Tempoh urgent (≤7 hari, tiada diskaun)</span>
+          <input type="checkbox" ${c.urgent?'checked':''} onchange="updateCatField('${c.id}','urgent',this.checked)" style="width:auto;">
+        </label>
+        <div class="totalrow"><span>Jumlah kategori ini</span><span class="amt">${fmt(catTotal(c))}</span></div>
+      </div>`;
+  }).join('');
+}
+
+function catTotal(c){ return c.services.reduce((s,x)=>s+x.price,0) * (parseInt(c.qty)||1); }
+function findCat(id){ return categories.find(c=>c.id===id); }
+
+window.updateCatField = (id, field, val)=>{ const c=findCat(id); if(!c) return; c[field]=(field==='qty')?(parseInt(val)||1):val; if(field!=='photoNote'){ renderCategories(); recalc(); } };
+window.removeCategory = (id)=>{ categories = categories.filter(c=>c.id!==id); renderCategories(); recalc(); };
+window.addService = (id, svcId)=>{
+  if(!svcId) return; const c=findCat(id); if(!c) return;
+  if(svcId==='__wa__'){ document.getElementById('wa-'+id).style.display='block'; return; }
+  const svc = SETTINGS.services.find(s=>s.id===svcId); if(!svc) return;
+  c.services.push({ svcId, name:svc.name, price:priceFor(svc, c.jenis), ukuran:'', nota:'' });
+  renderCategories(); recalc();
+};
+window.removeService = (id, idx)=>{ const c=findCat(id); c.services.splice(idx,1); renderCategories(); recalc(); };
+window.updateServiceField = (id, idx, field, val)=>{ const c=findCat(id); c.services[idx][field]=val; };
+
+window.handleRequiredPhoto = async (id, file)=>{
+  if(!file) return;
+  const errEl = document.getElementById('photo-err-'+id);
+  if(errEl) errEl.innerHTML = '';
+  try{ const c = findCat(id); c.photoRequiredData = await compressImage(file); renderCategories(); recalc(); }
+  catch(err){ if(errEl) errEl.innerHTML = `<div class="notice notice-danger">Upload gambar gagal pada peranti ini (${err.message}). Sila guna ruang penerangan di bawah sebagai gantian.</div>`; }
+};
+window.handleExtraPhoto = async (id, file)=>{
+  if(!file) return;
+  try{ const c=findCat(id); c.extraPhotos.push(await compressImage(file)); renderCategories(); }catch(err){}
+};
+window.removeExtraPhoto = (id, idx)=>{ const c=findCat(id); c.extraPhotos.splice(idx,1); renderCategories(); };
+
+async function recalc(){
+  const hantar = document.getElementById('p-hantar')?.value || 'sendiri';
+  const subtotal = categories.reduce((s,c)=>s+catTotal(c),0);
+  const totalQty = categories.reduce((s,c)=>s+(parseInt(c.qty)||1),0);
+  const urgentQty = categories.filter(c=>c.urgent).reduce((s,c)=>s+(parseInt(c.qty)||1),0);
+
+  const dwarn = document.getElementById('d-warning');
+  if(dwarn){ dwarn.innerHTML = urgentQty>2 ? `<div class="notice notice-danger">Pesanan urgent tidak boleh melebihi 2 helai.</div>` : ''; }
+
+  let measuringFee = 0;
+  if(hantar==='ukur' && SETTINGS.measuringFee.enabled){ measuringFee = SETTINGS.measuringFee.basis==='flat' ? SETTINGS.measuringFee.amount : SETTINGS.measuringFee.amount*totalQty; }
+
+  let priceDiscount = 0;
+  const disc = SETTINGS.discount; const isUkur = hantar==='ukur';
+  const discOn = isUkur ? disc.ukurEnabled : disc.enabled;
+  if(discOn && subtotal>0){
+    const val = isUkur ? disc.ukurValue : disc.value;
+    const basisVal = disc.basis==='amount' ? subtotal : totalQty;
+    const tiers = Math.floor(basisVal / disc.threshold);
+    if(tiers>=1){ priceDiscount = disc.type==='percent' ? subtotal*(val/100) : tiers*val; }
+  }
+
+  let voucherDiscount = 0;
+  const baucerInput = (document.getElementById('p-baucer')?.value||'').trim();
+  const msgEl = document.getElementById('baucer-msg');
+  if(baucerInput && SETTINGS.voucher.enabled){
+    try{
+      const phone = document.getElementById('p-phone')?.value || '';
+      const r = await api('/api/voucher/check', { method:'POST', body: JSON.stringify({ code: baucerInput, phone }) });
+      if(!r.valid){ if(msgEl) msgEl.innerHTML = `<div class="notice notice-danger">${r.reason}</div>`; }
+      else{
+        if(msgEl) msgEl.innerHTML = `<div class="notice notice-sage">Baucer sah — akan digunakan.</div>`;
+        if(r.appliesTo==='price'){ voucherDiscount = r.type==='percent' ? subtotal*(r.value/100) : r.value; }
+      }
+    }catch(e){ if(msgEl) msgEl.innerHTML = ''; }
+  } else if(msgEl){ msgEl.innerHTML=''; }
+
+  const grandTotal = Math.max(0, subtotal - priceDiscount - voucherDiscount) + measuringFee;
+
+  const bd = document.getElementById('c-breakdown');
+  if(bd){ bd.innerHTML = `<div class="status-line"><span class="lbl">Diskaun harga</span><span>-${fmt(priceDiscount)}</span></div><div class="status-line"><span class="lbl">Diskaun baucer</span><span>-${fmt(voucherDiscount)}</span></div>`; }
+  const ds = document.getElementById('d-summary');
+  if(ds){ ds.innerHTML = `
+    <div class="status-line"><span class="lbl">Jumlah servis (${totalQty} helai)</span><span>${fmt(subtotal)}</span></div>
+    ${measuringFee>0?`<div class="status-line"><span class="lbl">Upah mengukur</span><span>${fmt(measuringFee)}</span></div>`:''}
+    <div class="grandtotal"><span>Jumlah invois (tanpa kos pos)</span><span class="amt">${fmt(grandTotal)}</span></div>
+    ${SETTINGS.deposit.enabled ? `<div class="notice notice-muted">Deposit diperlukan: ${SETTINGS.deposit.type==='percent' ? SETTINGS.deposit.value+'%' : fmt(SETTINGS.deposit.value)} daripada jumlah ini, dibayar melalui bank/QR.</div>` : ''}
+  `; }
+}
+
+async function doBayar(){
+  const errEl = document.getElementById('d-error');
+  errEl.innerHTML = '';
+  const btn = document.getElementById('btn-bayar');
+  btn.disabled = true; btn.textContent = 'Menghantar...';
+  try{
+    const payload = {
+      nama: document.getElementById('p-nama').value.trim(),
+      alamat: document.getElementById('p-alamat').value.trim(),
+      phone: document.getElementById('p-phone').value,
+      plat: document.getElementById('p-plat')?.value || '',
+      hantar: document.getElementById('p-hantar').value,
+      appointmentDate: document.getElementById('p-hantar').value==='ukur' ? document.getElementById('p-slot').value : null,
+      ambil: document.getElementById('p-ambil')?.value,
+      bayar: document.getElementById('p-bayar').value,
+      categories,
+      voucherCode: document.getElementById('p-baucer').value.trim(),
+    };
+    const r = await api('/api/order', { method:'POST', body: JSON.stringify(payload) });
+    const o = r.order;
+    document.getElementById('d-receipt').innerHTML = `
+      <div class="notice notice-sage" style="margin-top:12px;">
+        Pesanan diterima! No. resit <strong>${o.receiptNo}</strong> · No. pesanan <strong>${o.noPesanan}</strong><br>
+        Kod pelanggan anda: <strong>${o.kodPelanggan}</strong><br>
+        ${o.hantar==='ukur' && o.appointmentDate==='__later__' ? 'Tarikh temu janji akan dimaklumkan oleh tailor melalui WhatsApp.<br>' : ''}
+        ${o.hantar==='ukur' && o.appointmentDate && o.appointmentDate!=='__later__' ? 'Temu janji ukur: '+o.appointmentDate+'<br>' : ''}
+        ${o.depositRequired ? `Sila jelaskan deposit ${fmt(o.depositAmount)} di tab <strong>Pusat Bayaran</strong> menggunakan no. pesanan ini.` : 'Sila rujuk tab Pusat Bayaran atau tailor untuk pengesahan bayaran seterusnya.'}
+      </div>`;
+    categories = [newCategory()];
+    document.getElementById('p-baucer').value='';
+    renderCategories();
+  }catch(e){
+    errEl.innerHTML = `<div class="notice notice-danger">${e.message}</div>`;
+  }finally{
+    btn.disabled = false; btn.textContent = 'Sahkan Pesanan';
+  }
+}
+
+/* ============ PUSAT BAYARAN ============ */
+function renderBayar(){
+  const el = document.getElementById('tab-bayar');
+  el.innerHTML = `
+    <div class="card">
+      <h2>Pusat Bayaran</h2>
+      <div class="sub">Cari pesanan anda untuk menjelaskan deposit, baki, atau kos pos</div>
+      <label>No. pesanan</label><input type="text" id="b-noPesanan" placeholder="PSN0001">
+      <label>No. telefon</label><input type="tel" id="b-phone" placeholder="012-3456789">
+      <button class="btn-primary" id="b-btn" type="button" style="margin-top:12px;">Cari Pesanan</button>
+      <div id="b-result" style="margin-top:14px;"></div>
+    </div>`;
+  document.getElementById('b-btn').addEventListener('click', lookupPayment);
+}
+
+async function lookupPayment(){
+  const no = document.getElementById('b-noPesanan').value.trim();
+  const phone = document.getElementById('b-phone').value;
+  const res = document.getElementById('b-result');
+  let o;
+  try{ o = await api('/api/order/'+encodeURIComponent(no)+'?phone='+encodeURIComponent(phone)); }
+  catch(e){ res.innerHTML = `<div class="notice notice-danger">${e.message}</div>`; return; }
+
+  let pending = null;
+  if(o.depositRequired && !o.depositConfirmed) pending = { kind:'deposit', amount:o.depositAmount, label:'Deposit pesanan' };
+  else if(o.postage.amount!=null && !o.postage.confirmed) pending = { kind:'postage', amount:o.postage.amount, label:'Kos pos (hantar balik)' };
+
+  if(!pending){ res.innerHTML = `<div class="notice notice-sage">Tiada bayaran tertunggak buat masa ini. Status semasa: <strong>${o.status}</strong>.</div>`; return; }
+  if((pending.kind==='deposit' && o.depositPaid) || (pending.kind==='postage' && o.postage.paid)){
+    res.innerHTML = `<div class="notice notice-muted">Bukti bayaran anda sedang disemak oleh tailor. Sila tunggu pengesahan.</div>`; return;
+  }
+
+  res.innerHTML = `
+    <div class="order-card"><div class="oc-top"><strong>${o.noPesanan}</strong><span class="pill pill-danger">${pending.label}</span></div>
+      <div class="totalrow"><span>Jumlah perlu dibayar</span><span class="amt">${fmt(pending.amount)}</span></div></div>
+    <div class="card"><h2>Buat Bayaran</h2>
+      <div class="sub">Deposit dan kos pos hanya boleh dibayar melalui QR atau bank (tiada tunai)</div>
+      ${SETTINGS.payment.qrImage ? `<label>Imbas QR</label><img class="qr-preview" src="${SETTINGS.payment.qrImage}">` : ''}
+      ${SETTINGS.payment.bankAccount ? `<div class="notice notice-muted">Bank: ${SETTINGS.payment.bankName}<br>No. akaun: ${SETTINGS.payment.bankAccount}<br>Nama: ${SETTINGS.payment.bankHolder}</div>` : ''}
+      <label>Muat naik resit/bukti bayaran</label><input type="file" accept="image/*" id="pay-proof">
+      <div id="pay-proof-preview"></div><div id="pay-err"></div>
+      <button class="btn-primary btn-rust" id="pay-confirm-btn" type="button" style="margin-top:10px;">Sahkan Bayaran</button>
+    </div>`;
+
+  document.getElementById('pay-proof').addEventListener('change', async (e)=>{
+    const f = e.target.files[0]; if(!f) return;
+    try{ const data = await compressImage(f); document.getElementById('pay-proof-preview').innerHTML = `<img class="photo-thumb" src="${data}">`; document.getElementById('pay-proof-preview').dataset.img = data; }
+    catch(err){ document.getElementById('pay-err').innerHTML = `<div class="notice notice-danger">Gagal memuat naik resit.</div>`; }
+  });
+
+  document.getElementById('pay-confirm-btn').addEventListener('click', async ()=>{
+    const img = document.getElementById('pay-proof-preview').dataset.img;
+    if(!img){ document.getElementById('pay-err').innerHTML = `<div class="notice notice-danger">Sila muat naik resit dahulu.</div>`; return; }
+    try{
+      const endpoint = pending.kind==='deposit' ? '/deposit-proof' : '/postage-proof';
+      await api('/api/order/'+encodeURIComponent(no)+endpoint, { method:'POST', body: JSON.stringify({ phone, proofImage: img }) });
+      res.innerHTML = `<div class="notice notice-sage">Bukti bayaran dihantar! Tailor akan disemak dan disahkan tidak lama lagi.</div>`;
+    }catch(e){ document.getElementById('pay-err').innerHTML = `<div class="notice notice-danger">${e.message}</div>`; }
+  });
+}
+
+/* ============ STATUS ============ */
+function renderStatus(){
+  const el = document.getElementById('tab-status');
+  el.innerHTML = `
+    <div class="card"><h2>Semak Status Pesanan</h2>
+      <label>No. pesanan</label><input type="text" id="s-noPesanan" placeholder="PSN0001">
+      <label>No. telefon</label><input type="tel" id="s-phone" placeholder="012-3456789">
+      <button class="btn-primary" id="s-btn" type="button" style="margin-top:12px;">Semak</button>
+      <div id="s-result" style="margin-top:14px;"></div>
+    </div>`;
+  document.getElementById('s-btn').addEventListener('click', doLookupStatus);
+}
+
+async function doLookupStatus(){
+  const no = document.getElementById('s-noPesanan').value.trim();
+  const phone = document.getElementById('s-phone').value;
+  const res = document.getElementById('s-result');
+  let o;
+  try{ o = await api('/api/order/'+encodeURIComponent(no)+'?phone='+encodeURIComponent(phone)); }
+  catch(e){ res.innerHTML = `<div class="notice notice-danger">${e.message}</div>`; return; }
+  const steps = stepsFor(o);
+  const curIdx = steps.indexOf(o.status);
+  res.innerHTML = `
+    <div class="order-card"><div class="oc-top"><strong>${o.noPesanan}</strong><span class="pill ${o.urgent?'pill-danger':'pill-sage'}">${o.urgent?'Urgent':'Biasa'}</span></div>
+      ${o.status==='Menunggu deposit' ? `<div class="notice notice-danger">Menunggu bayaran deposit — sila ke tab Pusat Bayaran.</div>` : steps.map((s,i)=>`<div class="status-line"><span class="lbl">${i<=curIdx?'✓':'○'} ${s}</span></div>`).join('')}
+      <div class="totalrow"><span>Jumlah invois</span><span class="amt">${fmt(o.total.grandTotal)}</span></div>
+      ${o.postage.amount!=null ? `<div class="status-line"><span class="lbl">Kos pos</span><span>${fmt(o.postage.amount)}</span></div>` : ''}
+    </div>
+    ${o.status==='Selesai' ? renderReviewBlock(o) : ''}
+  `;
+  if(o.status==='Selesai' && !o.review){ document.getElementById('review-submit')?.addEventListener('click', ()=>submitReview(o.noPesanan, phone)); }
+}
+
+function renderReviewBlock(o){
+  if(o.review){
+    return `<div class="card"><h2>Ulasan Anda</h2><div style="font-size:18px; color:var(--rust); margin:4px 0;">${'★'.repeat(o.review.rating)}${'☆'.repeat(5-o.review.rating)}</div><p style="font-size:13.5px;">${o.review.comment || ''}</p></div>`;
+  }
+  return `<div class="card"><h2>Beri Ulasan</h2><div class="sub">Pakaian anda telah siap — kongsikan pengalaman anda</div>
+    <label>Rating</label><select id="review-rating">
+      <option value="5">★★★★★ Sangat memuaskan</option><option value="4">★★★★☆ Memuaskan</option>
+      <option value="3">★★★☆☆ Sederhana</option><option value="2">★★☆☆☆ Kurang memuaskan</option><option value="1">★☆☆☆☆ Tidak memuaskan</option>
+    </select>
+    <label>Ulasan (pilihan)</label><textarea id="review-comment"></textarea>
+    <button class="btn-primary" id="review-submit" type="button" style="margin-top:10px;">Hantar Ulasan</button></div>`;
+}
+
+async function submitReview(noPesanan, phone){
+  const rating = document.getElementById('review-rating').value;
+  const comment = document.getElementById('review-comment').value;
+  try{ await api('/api/order/'+encodeURIComponent(noPesanan)+'/review', { method:'POST', body: JSON.stringify({ phone, rating, comment }) }); doLookupStatus(); }
+  catch(e){ alert(e.message); }
+}
+
+/* ============ ADMIN ============ */
+let adminUnlocked = false;
+async function renderAdmin(){
+  const el = document.getElementById('tab-admin');
+  if(!adminUnlocked){
+    el.innerHTML = `<div class="card"><h2>Panel Admin (Berkunci)</h2>
+      <div class="sub">Ruangan ini untuk tailor sahaja. Masukkan PIN admin.</div>
+      <input type="text" id="admin-pin-input" placeholder="Masukkan PIN">
+      <button class="btn-primary" id="admin-pin-btn" type="button" style="margin-top:10px;">Buka</button>
+      <div id="admin-pin-msg"></div></div>`;
+    document.getElementById('admin-pin-btn').addEventListener('click', async ()=>{
+      const pin = document.getElementById('admin-pin-input').value;
+      try{
+        const r = await api('/api/admin/login', { method:'POST', body: JSON.stringify({ pin }) });
+        if(r.ok){ sessionStorage.setItem('adminPin', pin); adminUnlocked = true; renderAdmin(); }
+        else{ document.getElementById('admin-pin-msg').innerHTML = `<div class="notice notice-danger">PIN salah.</div>`; }
+      }catch(e){ document.getElementById('admin-pin-msg').innerHTML = `<div class="notice notice-danger">${e.message}</div>`; }
+    });
+    return;
+  }
+
+  let orders, customers;
+  try{
+    orders = await api('/api/admin/orders', { headers: adminHeaders() });
+    customers = await api('/api/admin/customers', { headers: adminHeaders() });
+  }catch(e){ adminUnlocked=false; sessionStorage.removeItem('adminPin'); renderAdmin(); return; }
+
+  const actionItems = [];
+  orders.forEach(o=>{
+    if(o.depositRequired && o.depositPaid && !o.depositConfirmed) actionItems.push(`${o.noPesanan}: sahkan penerimaan deposit ${fmt(o.depositAmount)}`);
+    if(o.postage.paid && !o.postage.confirmed) actionItems.push(`${o.noPesanan}: sahkan penerimaan bayaran pos ${fmt(o.postage.amount)}`);
+    if(o.status==='Siap & dibungkus' && o.ambil==='pos' && o.postage.amount==null) actionItems.push(`${o.noPesanan}: tetapkan kos pos untuk pesanan ini`);
+  });
+
+  el.innerHTML = `
+    <div class="card">
+      ${actionItems.length>0 ? `<h2>Perlu Tindakan</h2>${actionItems.map(a=>`<div class="alert-list-item">${a}</div>`).join('')}` : '<h2>Perlu Tindakan</h2><div class="empty">Tiada tindakan tertunggak.</div>'}
+    </div>
+    <div class="card"><h2>Tempahan Masuk</h2><div class="sub">${orders.length} pesanan direkodkan</div>
+      <div id="admin-orders">${orders.length===0 ? '<div class="empty">Belum ada pesanan lagi.</div>' : orders.map(o=>renderAdminOrderCard(o)).join('')}</div>
+    </div>
+    <div class="card"><h2>Ulasan Pelanggan</h2>${renderReviewsSummary(orders)}</div>
+    <div class="card"><h2>Rekod Pelanggan</h2>
+      <table class="admin-tbl"><tr><th>Kod</th><th>Nama</th><th>Telefon</th></tr>
+        ${Object.entries(customers).map(([k,c])=>`<tr><td>${k}</td><td>${c.nama}</td><td>${c.phone}</td></tr>`).join('') || '<tr><td colspan=3 class="empty">Tiada rekod</td></tr>'}
+      </table>
+    </div>
+    <div class="card"><h2>Keselamatan Panel Admin</h2>
+      <label>PIN admin</label><input type="text" id="admin-pin-set" value="${SETTINGS.adminPin}">
+      <button class="btn-primary" type="button" id="btn-save-pin" style="margin-top:10px;">Simpan PIN</button>
+      <div id="pin-msg"></div>
+    </div>
+    <div class="card"><h2>Tetapan Pembayaran</h2>
+      <label>Nama bank</label><input type="text" id="pay-bankname" value="${SETTINGS.payment.bankName}">
+      <label>No. akaun</label><input type="text" id="pay-bankacc" value="${SETTINGS.payment.bankAccount}">
+      <label>Nama pemegang akaun</label><input type="text" id="pay-bankholder" value="${SETTINGS.payment.bankHolder}">
+      <label>Gambar QR pembayaran</label><input type="file" accept="image/*" id="pay-qr-upload">
+      ${SETTINGS.payment.qrImage ? `<img class="qr-preview" src="${SETTINGS.payment.qrImage}">` : ''}
+      <div id="qr-msg"></div>
+    </div>
+    <div class="card"><h2>Tetapan Deposit</h2>
+      <div class="toggle-line"><span>Wajibkan deposit</span><label class="switch"><input type="checkbox" id="dep-enabled" ${SETTINGS.deposit.enabled?'checked':''}><span class="slider"></span></label></div>
+      <div class="row">
+        <div><label>Jenis</label><select id="dep-type"><option value="percent" ${SETTINGS.deposit.type==='percent'?'selected':''}>Peratus</option><option value="fixed" ${SETTINGS.deposit.type==='fixed'?'selected':''}>RM tetap</option></select></div>
+        <div><label>Nilai</label><input type="number" id="dep-value" value="${SETTINGS.deposit.value}"></div>
+      </div>
+      <p class="small-note">Deposit hanya boleh dibayar melalui QR/bank (tiada tunai), termasuk untuk "Datang untuk ukur".</p>
+    </div>
+    <div class="card"><h2>Tetapan Servis &amp; Harga</h2>
+      <div id="svc-admin-list"></div>
+      <button class="btn-full" type="button" id="btn-add-svc">+ Tambah servis</button>
+      <button class="btn-primary" type="button" id="btn-save-svc" style="margin-top:10px;">Simpan Senarai Servis</button>
+    </div>
+    <div class="card"><h2>Tetapan Diskaun &amp; Baucer</h2>
+      <div class="settings-grp"><h3>Diskaun Harga</h3>
+        <div class="toggle-line"><span>Hidupkan diskaun harga</span><label class="switch"><input type="checkbox" id="d-enabled" ${SETTINGS.discount.enabled?'checked':''}><span class="slider"></span></label></div>
+        <label>Asas</label><select id="d-basis"><option value="amount" ${SETTINGS.discount.basis==='amount'?'selected':''}>Jumlah harga (RM)</option><option value="qty" ${SETTINGS.discount.basis==='qty'?'selected':''}>Kuantiti helai</option></select>
+        <div class="row">
+          <div><label>Setiap genap</label><input type="number" id="d-threshold" value="${SETTINGS.discount.threshold}"></div>
+          <div><label>Jenis</label><select id="d-type"><option value="fixed" ${SETTINGS.discount.type==='fixed'?'selected':''}>RM tetap</option><option value="percent" ${SETTINGS.discount.type==='percent'?'selected':''}>Peratus</option></select></div>
+          <div><label>Nilai</label><input type="number" id="d-value" value="${SETTINGS.discount.value}"></div>
+        </div>
+        <div class="toggle-line" style="margin-top:10px;"><span>Diskaun untuk "Datang ukur"</span><label class="switch"><input type="checkbox" id="d-ukur-enabled" ${SETTINGS.discount.ukurEnabled?'checked':''}><span class="slider"></span></label></div>
+        <label>Nilai diskaun (kadar lebih rendah)</label><input type="number" id="d-ukur-value" value="${SETTINGS.discount.ukurValue}">
+      </div>
+      <div class="settings-grp"><h3>Baucer Pelanggan Lama</h3>
+        <div class="toggle-line"><span>Hidupkan baucer</span><label class="switch"><input type="checkbox" id="v-enabled" ${SETTINGS.voucher.enabled?'checked':''}><span class="slider"></span></label></div>
+        <label>Diskaun untuk</label><select id="v-applies"><option value="price" ${SETTINGS.voucher.appliesTo==='price'?'selected':''}>Harga</option><option value="delivery" ${SETTINGS.voucher.appliesTo==='delivery'?'selected':''}>Kos pos</option></select>
+        <div class="row">
+          <div><label>Jenis</label><select id="v-type"><option value="percent" ${SETTINGS.voucher.type==='percent'?'selected':''}>Peratus</option><option value="fixed" ${SETTINGS.voucher.type==='fixed'?'selected':''}>RM tetap</option></select></div>
+          <div><label>Nilai</label><input type="number" id="v-value" value="${SETTINGS.voucher.value}"></div>
+          <div><label>Sah (hari)</label><input type="number" id="v-days" value="${SETTINGS.voucher.validityDays}"></div>
+        </div>
+      </div>
+      <div class="settings-grp"><h3>Upah Mengukur</h3>
+        <div class="toggle-line"><span>Hidupkan caj upah mengukur</span><label class="switch"><input type="checkbox" id="m-enabled" ${SETTINGS.measuringFee.enabled?'checked':''}><span class="slider"></span></label></div>
+        <div class="row">
+          <div><label>Asas</label><select id="m-basis"><option value="flat" ${SETTINGS.measuringFee.basis==='flat'?'selected':''}>Tetap/sesi</option><option value="perQty" ${SETTINGS.measuringFee.basis==='perQty'?'selected':''}>Ikut helai</option></select></div>
+          <div><label>Jumlah (RM)</label><input type="number" id="m-amount" value="${SETTINGS.measuringFee.amount}"></div>
+        </div>
+      </div>
+      <div class="settings-grp"><h3>Slot Temu Janji Ukur</h3>
+        <label>Tarikh tersedia (satu setiap baris)</label>
+        <textarea id="slots-text" style="min-height:70px;">${SETTINGS.appointmentSlots.join('\n')}</textarea>
+      </div>
+      <div class="settings-grp"><h3>Tempoh Bayar Kos Pos</h3>
+        <label>Hari untuk pelanggan bayar selepas kos pos ditetapkan</label>
+        <input type="number" id="postage-due-days" value="${SETTINGS.postageDueDays}">
+      </div>
+      <button class="btn-primary" type="button" id="btn-save-settings">Simpan Semua Tetapan</button>
+      <div id="save-msg"></div>
+    </div>
+  `;
+
+  renderSvcAdminList();
+  document.getElementById('btn-add-svc').addEventListener('click', ()=>{ SETTINGS.services.push({id:'s'+Date.now(), name:'', priceDefault:0, priceJeans:0}); renderSvcAdminList(); });
+  document.getElementById('btn-save-svc').addEventListener('click', async ()=>{
+    try{ await api('/api/admin/settings', { method:'POST', headers: adminHeaders(), body: JSON.stringify({ services: SETTINGS.services }) }); document.getElementById('save-msg').innerHTML = `<div class="notice notice-sage">Senarai servis disimpan.</div>`; }
+    catch(e){ document.getElementById('save-msg').innerHTML = `<div class="notice notice-danger">${e.message}</div>`; }
+  });
+  document.getElementById('btn-save-pin').addEventListener('click', async ()=>{
+    const newPin = document.getElementById('admin-pin-set').value.trim() || '1234';
+    try{ await api('/api/admin/settings', { method:'POST', headers: adminHeaders(), body: JSON.stringify({ adminPin: newPin }) }); sessionStorage.setItem('adminPin', newPin); SETTINGS.adminPin = newPin; document.getElementById('pin-msg').innerHTML = `<div class="notice notice-sage">PIN dikemaskini.</div>`; }
+    catch(e){ document.getElementById('pin-msg').innerHTML = `<div class="notice notice-danger">${e.message}</div>`; }
+  });
+  document.getElementById('pay-qr-upload').addEventListener('change', async (e)=>{
+    const f = e.target.files[0]; if(!f) return;
+    try{
+      const data = await compressImage(f);
+      await api('/api/admin/settings', { method:'POST', headers: adminHeaders(), body: JSON.stringify({ payment: Object.assign({}, SETTINGS.payment, { qrImage: data }) }) });
+      SETTINGS.payment.qrImage = data;
+      document.getElementById('qr-msg').innerHTML = `<div class="notice notice-sage">QR disimpan.</div>`;
+      renderAdmin();
+    }catch(err){ document.getElementById('qr-msg').innerHTML = `<div class="notice notice-danger">Gagal memuat naik QR.</div>`; }
+  });
+  document.getElementById('btn-save-settings').addEventListener('click', saveAllSettings);
+}
+
+function renderAdminOrderCard(o){
+  const steps = stepsFor(o);
+  let statusOptions = steps.map(s=>`<option value="${s}" ${o.status===s?'selected':''}>${s}</option>`).join('');
+  const depositBlock = o.depositRequired ? `
+    <div class="status-line"><span class="lbl">Deposit</span><span>${fmt(o.depositAmount)} ${o.depositConfirmed?'✓ disahkan':(o.depositPaid?'(bukti dihantar)':'(belum bayar)')}</span></div>
+    ${o.depositPaid && !o.depositConfirmed ? `<img class="photo-thumb" src="${o.depositProof}"><button class="btn-full" type="button" onclick="confirmDeposit('${o.noPesanan}')">Sahkan Terima Deposit</button>` : ''}` : '';
+  const postageSetBlock = (o.status==='Siap & dibungkus' && o.ambil==='pos' && o.postage.amount==null) ? `
+    <div class="notice notice-muted">Tetapkan kos pos untuk pesanan ini</div>
+    <input type="number" id="postage-input-${o.noPesanan}" placeholder="Kos pos (RM)">
+    <button class="btn-full" type="button" onclick="setPostage('${o.noPesanan}')">Tetapkan &amp; Maklumkan Pelanggan</button>` : '';
+  const postagePayBlock = (o.postage.amount!=null) ? `
+    <div class="status-line"><span class="lbl">Kos pos</span><span>${fmt(o.postage.amount)} ${o.postage.confirmed?'✓ disahkan':(o.postage.paid?'(bukti dihantar)':'(belum bayar, tempoh '+o.postage.dueDate+')')}</span></div>
+    ${o.postage.paid && !o.postage.confirmed ? `<img class="photo-thumb" src="${o.postage.proof}"><button class="btn-full" type="button" onclick="confirmPostage('${o.noPesanan}')">Sahkan Terima Bayaran Pos</button>` : ''}` : '';
+  return `
+    <div class="order-card">
+      <div class="oc-top"><div><strong>${o.noPesanan}</strong> — ${o.nama} (${o.kodPelanggan})<br><span class="small-note">${o.hantar} · ${o.tarikhOrder}</span></div>
+        <span class="pill ${o.urgent?'pill-danger':'pill-sage'}">${o.urgent?'Urgent':'Biasa'}</span></div>
+      ${depositBlock}
+      ${o.status!=='Menunggu deposit' ? `<select onchange="setOrderStatus('${o.noPesanan}', this.value)">${statusOptions}</select>` : `<div class="notice notice-danger">Menunggu deposit dibayar &amp; disahkan.</div>`}
+      ${o.tarikhTerima ? deadlineNote(o) : ''}
+      ${postageSetBlock}
+      ${postagePayBlock}
+      ${o.status==='Selesai' ? `<button class="btn-full" style="margin-top:8px;" type="button" onclick="lepasBaucer('${o.noPesanan}')">Lepaskan baucer pelanggan lama</button>` : ''}
+    </div>`;
+}
+
+function renderReviewsSummary(orders){
+  const reviewed = orders.filter(o=>o.review);
+  if(reviewed.length===0) return '<div class="empty">Belum ada ulasan lagi.</div>';
+  const avg = reviewed.reduce((s,o)=>s+o.review.rating,0) / reviewed.length;
+  return `<div class="sub" style="margin-bottom:10px;">Purata: <strong style="color:var(--rust);">${avg.toFixed(1)} ★</strong> daripada ${reviewed.length} ulasan</div>
+    ${reviewed.map(o=>`<div class="status-line" style="display:block; padding:8px 0; border-bottom:1px solid var(--paper-2);">
+      <div style="display:flex; justify-content:space-between;"><span>${o.nama} — ${o.noPesanan}</span><span style="color:var(--rust);">${'★'.repeat(o.review.rating)}${'☆'.repeat(5-o.review.rating)}</span></div>
+      ${o.review.comment ? `<div class="small-note" style="margin-top:2px;">${o.review.comment}</div>` : ''}
+    </div>`).join('')}`;
+}
+
+function renderSvcAdminList(){
+  const wrap = document.getElementById('svc-admin-list');
+  wrap.innerHTML = SETTINGS.services.map((s,i)=>`
+    <div class="svc-admin-row">
+      <input type="text" placeholder="Nama servis" value="${s.name}" oninput="SETTINGS.services[${i}].name=this.value">
+      <input type="number" placeholder="Harga biasa" value="${s.priceDefault}" style="max-width:80px;" oninput="SETTINGS.services[${i}].priceDefault=parseFloat(this.value)||0">
+      <input type="number" placeholder="Harga jeans" value="${s.priceJeans}" style="max-width:80px;" oninput="SETTINGS.services[${i}].priceJeans=parseFloat(this.value)||0">
+      <button class="btn-ghost" type="button" onclick="removeSvcAdmin(${i})">✕</button>
+    </div>`).join('');
+}
+window.removeSvcAdmin = (i)=>{ SETTINGS.services.splice(i,1); renderSvcAdminList(); };
+
+async function saveAllSettings(){
+  const payload = {
+    discount: {
+      enabled: document.getElementById('d-enabled').checked,
+      basis: document.getElementById('d-basis').value,
+      threshold: parseFloat(document.getElementById('d-threshold').value)||100,
+      type: document.getElementById('d-type').value,
+      value: parseFloat(document.getElementById('d-value').value)||0,
+      ukurEnabled: document.getElementById('d-ukur-enabled').checked,
+      ukurValue: parseFloat(document.getElementById('d-ukur-value').value)||0,
+    },
+    voucher: {
+      enabled: document.getElementById('v-enabled').checked,
+      appliesTo: document.getElementById('v-applies').value,
+      type: document.getElementById('v-type').value,
+      value: parseFloat(document.getElementById('v-value').value)||0,
+      validityDays: parseInt(document.getElementById('v-days').value)||30,
+    },
+    measuringFee: {
+      enabled: document.getElementById('m-enabled').checked,
+      basis: document.getElementById('m-basis').value,
+      amount: parseFloat(document.getElementById('m-amount').value)||0,
+    },
+    appointmentSlots: document.getElementById('slots-text').value.split('\n').map(s=>s.trim()).filter(Boolean),
+    postageDueDays: parseInt(document.getElementById('postage-due-days').value)||3,
+    deposit: {
+      enabled: document.getElementById('dep-enabled').checked,
+      type: document.getElementById('dep-type').value,
+      value: parseFloat(document.getElementById('dep-value').value)||0,
+    },
+    payment: Object.assign({}, SETTINGS.payment, {
+      bankName: document.getElementById('pay-bankname').value.trim(),
+      bankAccount: document.getElementById('pay-bankacc').value.trim(),
+      bankHolder: document.getElementById('pay-bankholder').value.trim(),
+    }),
+  };
+  try{
+    const r = await api('/api/admin/settings', { method:'POST', headers: adminHeaders(), body: JSON.stringify(payload) });
+    SETTINGS = r.settings;
+    document.getElementById('save-msg').innerHTML = `<div class="notice notice-sage">Semua tetapan disimpan.</div>`;
+  }catch(e){ document.getElementById('save-msg').innerHTML = `<div class="notice notice-danger">${e.message}</div>`; }
+}
+
+window.setOrderStatus = async (noPesanan, status)=>{
+  try{ await api('/api/admin/order/'+encodeURIComponent(noPesanan)+'/status', { method:'POST', headers: adminHeaders(), body: JSON.stringify({ status }) }); renderAdmin(); }
+  catch(e){ alert(e.message); }
+};
+window.confirmDeposit = async (noPesanan)=>{
+  try{ await api('/api/admin/order/'+encodeURIComponent(noPesanan)+'/confirm-deposit', { method:'POST', headers: adminHeaders() }); renderAdmin(); }
+  catch(e){ alert(e.message); }
+};
+window.setPostage = async (noPesanan)=>{
+  const input = document.getElementById('postage-input-'+noPesanan);
+  const amount = parseFloat(input.value);
+  if(!amount || amount<=0) return;
+  try{ await api('/api/admin/order/'+encodeURIComponent(noPesanan)+'/set-postage', { method:'POST', headers: adminHeaders(), body: JSON.stringify({ amount }) }); renderAdmin(); }
+  catch(e){ alert(e.message); }
+};
+window.confirmPostage = async (noPesanan)=>{
+  try{ await api('/api/admin/order/'+encodeURIComponent(noPesanan)+'/confirm-postage', { method:'POST', headers: adminHeaders() }); renderAdmin(); }
+  catch(e){ alert(e.message); }
+};
+window.lepasBaucer = async (noPesanan)=>{
+  try{
+    const r = await api('/api/admin/order/'+encodeURIComponent(noPesanan)+'/release-voucher', { method:'POST', headers: adminHeaders() });
+    const elMsg = document.createElement('div'); elMsg.className='notice notice-sage';
+    elMsg.textContent = 'Kod baucer dijana: '+r.code+' (sah sehingga '+r.expiry+')';
+    document.getElementById('tab-admin').prepend(elMsg);
+  }catch(e){ alert(e.message); }
+};
+
+function deadlineNote(o){
+  const days = o.urgent ? 7 : 15;
+  const deadline = addWorkingDays(o.tarikhTerima, days);
+  let mustPost = o.ambil==='pos' ? subWorkingDays(deadline, 3) : deadline;
+  const label = o.ambil==='pos' ? 'Mesti siap & pos sebelum' : 'Deadline siap';
+  return `<div class="status-line"><span class="lbl">${label}</span><span>${mustPost}</span></div>`;
+}
+
+/* ============ TAB SWITCHING ============ */
+document.querySelectorAll('.tab').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('section').forEach(s=>s.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
+    if(btn.dataset.tab==='bayar') renderBayar();
+    if(btn.dataset.tab==='status') renderStatus();
+    if(btn.dataset.tab==='admin') renderAdmin();
+  });
+});
+
+/* ============ INIT ============ */
+(async function init(){
+  SETTINGS = await api('/api/settings');
+  renderPelanggan();
+})();
+</script>
+</body>
+</html>
