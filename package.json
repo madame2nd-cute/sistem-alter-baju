@@ -4,5 +4,6 @@
   "description": "Sistem borang dan panel admin alter baju",
   "main": "server.js",
   "scripts": { "start": "node server.js" },
+  "dependencies": { "nodemailer": "^6.9.14" },
   "engines": { "node": ">=18" }
 }
